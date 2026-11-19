@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: karya-chatbot
+    runtime: docker
+    plan: free
+    disk:
+      name: karya-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: BOT_NAME
+        value: Karya
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: DATA_DIR
+        value: /data
+      - key: PYTHON_VERSION
+        value: 3.11.9
