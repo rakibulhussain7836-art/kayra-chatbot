@@ -130,6 +130,27 @@ def register() -> None:
     dp.errors.register(on_error)
 
 
+async def start_health_server() -> None:
+    """Tiny HTTP server so Render (web type) sees an open port and stays alive."""
+    import os
+
+    from aiohttp import web
+
+    app = web.Application()
+
+    async def ok(_request):
+        return web.Response(text=f"{settings.bot_name} is running!")
+
+    app.router.add_get("/", ok)
+    app.router.add_get("/health", ok)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 10000))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    log.info("Health server on :%s", port)
+
+
 async def main() -> None:
     if not settings.bot_token:
         raise SystemExit("BOT_TOKEN missing — fill .env first!")
@@ -148,11 +169,13 @@ async def main() -> None:
     me = await bot.get_me()
     log.info("Starting %s (@%s)", me.first_name, me.username)
 
+    health = asyncio.create_task(start_health_server())
     sched = asyncio.create_task(scheduler(bot))
     try:
         await dp.start_polling(bot)
     finally:
         sched.cancel()
+        health.cancel()
         await ai_client.close()
         await db.close()
 
