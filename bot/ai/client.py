@@ -8,7 +8,7 @@ from ..config import settings
 
 log = logging.getLogger("karya.ai")
 
-TIMEOUT = aiohttp.ClientTimeout(total=15)
+TIMEOUT = aiohttp.ClientTimeout(total=10, sock_connect=5, sock_read=8)
 
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
@@ -53,12 +53,13 @@ class AIClient:
 
         errors: list[str] = []
         providers = []
-        if settings.gemini_key:
-            providers.append(("gemini", self._gemini, (messages, system, max_tokens)))
+        # fastest first: Groq is quickest, Gemini next, OpenRouter last
         if settings.groq_key:
             providers.append(
                 ("groq", self._openai, (messages, system, max_tokens, settings.groq_key, GROQ_URL, settings.groq_model))
             )
+        if settings.gemini_key:
+            providers.append(("gemini", self._gemini, (messages, system, max_tokens)))
         if settings.openrouter_key:
             providers.append(
                 (

@@ -16,6 +16,14 @@ HISTORY: dict[int, deque] = defaultdict(lambda: deque(maxlen=10))
 LAST_AI: dict[int, float] = {}
 COOLDOWN_DM = 2.0
 COOLDOWN_GROUP = 4.0
+_BOT_USER = None
+
+
+async def _get_bot_user(bot):
+    global _BOT_USER
+    if _BOT_USER is None:
+        _BOT_USER = await bot.get_me()
+    return _BOT_USER
 
 
 def _strip_mention(text: str, username: str) -> str:
@@ -39,7 +47,7 @@ async def ai_chat(message: Message) -> None:
     if user is None:
         return
 
-    bot_user = await message.bot.get_me()
+    bot_user = await _get_bot_user(message.bot)
 
     if chat.type != "private":
         reply_to_bot = (
