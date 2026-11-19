@@ -100,33 +100,6 @@ async def cmd_unwarn(message: Message) -> None:
     await message.answer(f"✅ Warning reduced for {_name(target)}")
 
 
-@router.message(Command("mute"))
-async def cmd_mute(message: Message) -> None:
-    if not await is_admin(message.bot, message.chat.id, message.from_user.id):
-        await message.answer("Admins only 🛡️")
-        return
-    if not message.reply_to_message:
-        await message.answer("Reply to a user: <code>/mute</code> (30 min)")
-        return
-    target = message.reply_to_message.from_user
-    if await is_admin(message.bot, message.chat.id, target.id):
-        await message.answer("Admin ko mute nahi kar sakte")
-        return
-    import datetime as dt
-
-    until = dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=30)
-    try:
-        await message.bot.restrict_chat_member(
-            message.chat.id, target.id,
-            permissions=ChatPermissions(),
-            until_date=until,
-        )
-    except Exception:
-        await message.answer("Mute fail — bot ko admin banao 🛡️")
-        return
-    await message.answer(f"🔇 {_name(target)} muted for 30 minutes")
-
-
 @router.message(Command("unmute"))
 async def cmd_unmute(message: Message) -> None:
     if not await is_admin(message.bot, message.chat.id, message.from_user.id):
@@ -207,13 +180,7 @@ async def cmd_ban(message: Message) -> None:
 async def on_join(message: Message) -> None:
     me = await message.bot.get_me()
     for user in message.new_chat_members:
-        if user.id == me.id:
-            await message.answer(
-                WELCOME.format(name="everyone", bot=me.first_name)
-                + "\n\nI can also manage groups — make me <b>admin</b> for full protection 🛡️"
-            )
-            continue
-        if user.is_bot:
+        if user.id == me.id or user.is_bot:
             continue
         blob = f"{user.first_name or ''} {user.username or ''}".lower()
         hit = next((w for w in BANNED_WORDS if w in blob), None)
@@ -225,10 +192,6 @@ async def on_join(message: Message) -> None:
                 pass
             await message.answer(
                 f"🛡️ Bio scanner: {_name(user)} blocked (suspicious name) ⛔"
-            )
-        else:
-            await message.answer(
-                WELCOME.format(name=_name(user), bot=me.first_name)
             )
 
 

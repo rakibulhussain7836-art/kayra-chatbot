@@ -92,6 +92,28 @@ CREATE TABLE IF NOT EXISTS lotteries (
     ends_at TEXT NOT NULL,
     participants TEXT DEFAULT ''
 );
+
+CREATE TABLE IF NOT EXISTS chat_settings (
+    chat_id INTEGER PRIMARY KEY,
+    antilink INTEGER DEFAULT 1,
+    antiflood INTEGER DEFAULT 1,
+    antinsfw INTEGER DEFAULT 1,
+    antisticker INTEGER DEFAULT 1,
+    anticaps INTEGER DEFAULT 1,
+    welcome_on INTEGER DEFAULT 1,
+    goodbye_on INTEGER DEFAULT 0,
+    lockdown INTEGER DEFAULT 0,
+    antibot INTEGER DEFAULT 1,
+    welcome_text TEXT DEFAULT '',
+    goodbye_text TEXT DEFAULT '',
+    rules TEXT DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS word_filters (
+    chat_id INTEGER NOT NULL,
+    word TEXT NOT NULL,
+    PRIMARY KEY (chat_id, word)
+);
 """
 
 
@@ -204,3 +226,56 @@ def now_dt() -> datetime.datetime:
 
 def parse_iso(s: str) -> datetime.datetime:
     return datetime.datetime.fromisoformat(s)
+
+
+async def get_chat_settings(chat_id: int) -> aiosqlite.Row:
+    row = await one("SELECT * FROM chat_settings WHERE chat_id = ?", (chat_id,))
+    if row is None:
+        await run("INSERT OR IGNORE INTO chat_settings (chat_id) VALUES (?)", (chat_id,))
+        row = await one("SELECT * FROM chat_settings WHERE chat_id = ?", (chat_id,))
+    return row
+
+
+async def set_chat_setting(chat_id: int, key: str, value) -> None:
+    allowed = {
+        "antilink", "antiflood", "antinsfw", "antisticker", "anticaps",
+        "welcome_on", "goodbye_on", "lockdown", "antibot",
+        "welcome_text", "goodbye_text", "rules",
+    }
+    if key not in allowed:
+        return
+    await run(
+        f"UPDATE chat_settings SET {key} = ? WHERE chat_id = ?",
+        (value, chat_id),
+    )
+
+
+async def get_word_filters(chat_id: int) -> list[str]:
+    rows = await many("SELECT word FROM word_filters WHERE chat_id = ?", (chat_id,))
+    return [r["word"] for r in rows]
+
+
+async def add_word_filter(chat_id: int, word: str) -> bool:
+    word = word.strip().lower()
+    if not word:
+        return False
+    existing = await one(
+        "SELECT 1 FROM word_filters WHERE chat_id = ? AND word = ?",
+        (chat_id, word),
+    )
+    if existing:
+        return False
+    await run("INSERT INTO word_filters (chat_id, word) VALUES (?, ?)", (chat_id, word))
+    return True
+
+
+async def remove_word_filter(chat_id: int, word: str) -> bool:
+    word = word.strip().lower()
+    row = await one(
+        "SELECT 1 FROM word_filters WHERE chat_id = ? AND word = ?",
+        (chat_id, word),
+    )
+    if not row:
+        return False
+    await run("DELETE FROM word_filters WHERE chat_id = ? AND word = ?", (chat_id, word))
+    return True

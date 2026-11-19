@@ -20,6 +20,7 @@ from .handlers import (
     chat,
     economy,
     games,
+    group,
     help as help_mod,
     love,
     moderation,
@@ -28,7 +29,7 @@ from .handlers import (
 )
 from .middlewares.forcejoin import ForceJoinMiddleware
 from .middlewares.forcejoin import router as forcejoin_router
-from .middlewares.spam import SpamMiddleware
+from .middlewares.guard import GuardMiddleware
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 log = logging.getLogger("kayra")
@@ -71,8 +72,20 @@ COMMANDS = [
     ("ocr", "Extract text from image"),
     ("bribe", "Custom AI persona"),
     ("warn", "Warn a user (admin)"),
-    ("mute", "Mute 30m (admin)"),
+    ("mute", "Mute user (admin)"),
     ("kick", "Kick user (admin)"),
+    ("settings", "Group settings (admin)"),
+    ("rules", "Group rules"),
+    ("lockdown", "Lock group (admin)"),
+    ("purge", "Delete recent msgs (admin)"),
+    ("del", "Delete replied msg"),
+    ("adminlist", "List group admins"),
+    ("id", "Show user/chat ID"),
+    ("report", "Report a message"),
+    ("filter", "Add banned word (admin)"),
+    ("filters", "List banned words"),
+    ("setwelcome", "Custom welcome (admin)"),
+    ("setrules", "Custom rules (admin)"),
 ]
 
 
@@ -123,6 +136,7 @@ def register() -> None:
 
     # moderation service handlers + admin commands first (specific filters)
     dp.include_router(moderation.router)
+    dp.include_router(group.router)
     dp.include_router(start.router)
     dp.include_router(help_mod.router)
     dp.include_router(economy.router)
@@ -133,7 +147,8 @@ def register() -> None:
     # AI chat LAST — catch-all for plain text
     dp.include_router(chat.router)
 
-    dp.message.outer_middleware(SpamMiddleware())
+    # guard AFTER force-join (outer_middleware stack: forcejoin → guard)
+    dp.message.outer_middleware(GuardMiddleware())
     dp.errors.register(on_error)
 
 
