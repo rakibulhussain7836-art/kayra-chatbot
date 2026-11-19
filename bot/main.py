@@ -29,12 +29,12 @@ from .handlers import (
 from .middlewares.spam import SpamMiddleware
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
-log = logging.getLogger("karya")
+log = logging.getLogger("kayra")
 
 dp = Dispatcher()
 
 COMMANDS = [
-    ("start", "Start Karya"),
+    ("start", "Start Kayra"),
     ("help", "All commands"),
     ("profile", "Your profile & stats"),
     ("daily", "Claim daily coins"),

@@ -6,7 +6,7 @@ import aiohttp
 
 from ..config import settings
 
-log = logging.getLogger("karya.ai")
+log = logging.getLogger("kayra.ai")
 
 TIMEOUT = aiohttp.ClientTimeout(total=10, sock_connect=5, sock_read=8)
 

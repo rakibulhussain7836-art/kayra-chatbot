@@ -134,7 +134,7 @@ async def cmd_lyrics(message: Message) -> None:
         await message.answer("Usage: <code>/lyrics shape of you ed sheeran</code>")
         return
     await message.bot.send_chat_action(message.chat.id, "typing")
-    headers = {"User-Agent": "KaryaChatbot/1.0"}
+    headers = {"User-Agent": "KayraChatbot/1.0"}
     async with aiohttp.ClientSession(timeout=TIMEOUT, headers=headers) as session:
         try:
             async with session.get("https://lrclib.net/api/search", params={"q": query[1]}) as resp:

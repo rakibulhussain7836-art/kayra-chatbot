@@ -18,7 +18,7 @@ def main_keyboard(username: str) -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="➕ Add Karya to Your Group",
+                    text="➕ Add Kayra to Your Group",
                     url=f"https://t.me/{username}?startgroup=true",
                 )
             ],
@@ -67,7 +67,7 @@ async def cb_chat_guide(cb: CallbackQuery) -> None:
         f"• Commands like <code>/math</code>, <code>/daily</code> work anywhere "
         f"without mentioning\n\n"
         f"Examples:\n"
-        f"→ <i>kaise ho Karya?</i> → Hindi mein reply\n"
+        f"→ <i>kaise ho Kayra?</i> → Hindi mein reply\n"
         f"→ <i>tell me a joke</i> → English mein reply"
     )
     await cb.message.edit_text(text, reply_markup=main_keyboard((await cb.bot.get_me()).username))

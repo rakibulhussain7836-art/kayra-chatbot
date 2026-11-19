@@ -9,7 +9,7 @@ load_dotenv()
 @dataclass(frozen=True)
 class Settings:
     bot_token: str = os.getenv("BOT_TOKEN", "")
-    bot_name: str = os.getenv("BOT_NAME", "Karya")
+    bot_name: str = os.getenv("BOT_NAME", "Kayra")
     gemini_key: str = os.getenv("GEMINI_API_KEY", "")
     groq_key: str = os.getenv("GROQ_API_KEY", "")
     openrouter_key: str = os.getenv("OPENROUTER_API_KEY", "")
