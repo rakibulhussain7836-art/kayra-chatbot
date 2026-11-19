@@ -26,6 +26,8 @@ from .handlers import (
     persona_cmd,
     start,
 )
+from .middlewares.forcejoin import ForceJoinMiddleware
+from .middlewares.forcejoin import router as forcejoin_router
 from .middlewares.spam import SpamMiddleware
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
@@ -114,6 +116,11 @@ async def on_error(event: ErrorEvent) -> None:
 
 
 def register() -> None:
+    # force-join check FIRST, then spam protection
+    dp.message.outer_middleware(ForceJoinMiddleware())
+    dp.callback_query.outer_middleware(ForceJoinMiddleware())
+    dp.include_router(forcejoin_router)
+
     # moderation service handlers + admin commands first (specific filters)
     dp.include_router(moderation.router)
     dp.include_router(start.router)

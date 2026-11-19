@@ -14,5 +14,7 @@ services:
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false
+      - key: FORCE_CHANNEL
+        value: "@talkNhappy"
       - key: DATA_DIR
         value: /data

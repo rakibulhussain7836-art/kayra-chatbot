@@ -16,6 +16,7 @@ class Settings:
     groq_model: str = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
     openrouter_model: str = os.getenv("OPENROUTER_MODEL", "nvidia/nemotron-3.5-lightning:free")
     data_dir: str = os.getenv("DATA_DIR", "./data")
+    force_channel: str = os.getenv("FORCE_CHANNEL", "")
 
 
 settings = Settings()
